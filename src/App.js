@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import Web3 from 'web3'
-import {Container, Navbar, Button} from 'react-bootstrap'
+import {Container, Navbar, Button, Row, Col, Form} from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import logo from './logo.svg';
 import './App.css';
@@ -11,8 +11,9 @@ function App() {
   const [currentAccount, setAccount] = useState()
   const [currentAccountBalance, setCurrentAccountBalance] = useState()
   const [isMetaMaskConnected, setIsMetaMaskConnected] = useState(false);
-
-
+  const [nftswapaddress, setNftSwapAddress] = useState();
+  const [bidamount, setBidAmount] = useState();
+  
   const loadWeb3 = async() => {
     if(window.ethereum) {
       window.web3 = new Web3(window.ethereum)
@@ -42,33 +43,62 @@ function App() {
     loadWalletData()
   })
 
-  
+  const submitBid = async() => {
+    var web3 = new Web3(Web3.givenProvider);
+    
+    web3.eth.sendTransaction({
+      to: nftswapaddress,
+      from: currentAccount,
+      value: web3.utils.toWei(bidamount), 
+      gas: 400000,
+      gasPrice: 21000000000
+    }) 
+    .then(txRaw => {
+      console.log(txRaw.transactionHash)
+      //return response.json( txRaw.transactionHash );
+    })
+    .catch(function(error) {
+      //handleRevert(error);
+      console.log("Error: \n" + error);
+      //return response.json( 'error' )
+    })
+  }
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <Container>
-          <Navbar>
-            <Navbar.Brand style={{justifyContent: "left"}}>
-            <img 
-              src={SunnySwapIcon} alt="Sunny Swap" 
-              width={50}
-              length={50}
-              style={{justifyContent: "left"}}
-            />
-            </Navbar.Brand>
-            <Navbar.Brand style={{justifyContent: "center", color:"white"}}>
-              {currentAccount}
-            </Navbar.Brand>
-            <Navbar.Brand style={{justifyContent: "right", color:"white"}}>
-              Balance {currentAccountBalance}
-            </Navbar.Brand>
-          </Navbar>
+    <div className="App-header">
+      <Container className='App-header'>
+      <Row>
+        <header>
+            <Navbar>
+              <Navbar.Brand style={{justifyContent: "left"}}>
+              <img 
+                src={SunnySwapIcon} alt="Sunny Swap" 
+                width={50}
+                length={50}
+                style={{justifyContent: "left"}}
+              />
+              </Navbar.Brand>
+              <Navbar.Brand style={{justifyContent: "center", color:"white"}}>
+                {currentAccount}
+              </Navbar.Brand>
+              <Navbar.Brand style={{justifyContent: "right", color:"white"}}>
+                Funds {currentAccountBalance}
+              </Navbar.Brand>
+            </Navbar>
+        </header>
+      </Row>
+      <Row>
+        <Container style={{margin: "0 auto", width: "40%"}}>
+        <Form.Group className='mb-3'>
+            <Form.Control placeholder='NFT Collection Address' onChange={(e) => {setNftSwapAddress(e.target.value)}}/>
+            <Form.Control placeholder='Bid Amount' onChange={(e) => {setBidAmount(e.target.value)}}/>
+          </Form.Group>
+          <div>
+                <Button variant='primary' onClick={submitBid}>Swap NFT Assets</Button>
+          </div>
         </Container>
-      </header>
-      <div>
-          <Button variant='primary'>Swap NFT Assets</Button>
-      </div>
+      </Row>
+      </Container>
     </div>
   )
     
